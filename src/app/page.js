@@ -1,39 +1,34 @@
 import styles from "./page.module.css";
 import { Categorias } from "./components/Categorias";
 import { Produtos } from "./components/Produtos";
-import { API_BASE_URL, API_ENDPOINTS } from "../../lib/config";
+import { fetchCategories, fetchProducts } from "../../lib/data-layer";
+import { unstable_cache } from "next/cache";
 
-const fetchCategories = async () => {
-  const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.CATEGORIES}`, {
-    cache: "force-cache",
-  });
-  console.log(API_BASE_URL);
-  console.log(API_ENDPOINTS.CATEGORIES);
-  if (!response.ok) {
-    throw new Error(
-      `Erro ao buscar categorias: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  return await response.json();
+//Metadata para SEO
+export const metadata = {
+  title: "Meteora | Loja de Roupas",
+  description:
+    "Descubra as últimas tendencias em moda na Meteora. Camisetas, blusas, calçados em muito mais com qualidade e estilo.",
+  keywords: "moda, roupas, camisetas, bolsas, calçados, meteora",
+  openGraph: {
+    title: "Meteora - Loja de Roupas",
+    description: "As últimas tendências em moda você encontra aqui",
+    type: "website",
+  },
 };
 
-const fetchProducts = async () => {
-  const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.PRODUCTS}`, {
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Erro ao buscar produtos ${response.status} ${response.statusText}`,
-    );
-  }
-  return await response.json();
-};
+const getCachedProducts = unstable_cache(
+  () => fetchProducts({ limit: 6 }),
+  ["products=home"],
+  {
+    revalidade: 10,
+  },
+);
 
 export default async function Home() {
   const [categorias, produtos] = await Promise.all([
     fetchCategories(),
-    fetchProducts(),
+    getCachedProducts(),
   ]);
 
   return (
