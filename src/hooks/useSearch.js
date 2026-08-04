@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../../lib/config";
 
 export const useSearch = () => {
   const [query, setQuery] = useState("");
